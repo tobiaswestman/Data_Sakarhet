@@ -16,6 +16,10 @@ namespace Uppgift1Client
     {
         public void Connect()
         {
+            // Låt servern starta
+            Console.WriteLine("Tryck på en knapp för att starta:");
+            Console.ReadKey();
+            
             // Skapa en anslutning till servern på "localhost" och port 4000.
             TcpClient client = new TcpClient("localhost", 4000);
             NetworkStream stream = client.GetStream();
