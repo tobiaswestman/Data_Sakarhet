@@ -1,6 +1,6 @@
-namespace Server_API.Helpers.Interfaces;
-
-public class ITemperatureDataService
+﻿namespace Server_API.Helpers.Interfaces
 {
-    
+    public interface ITemperatureDataService
+    {
+    }
 }
