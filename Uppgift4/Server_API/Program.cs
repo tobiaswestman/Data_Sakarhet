@@ -5,7 +5,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers();
-builder.Services.AddSignalR(); // Lägg till SignalR-tjänster
+builder.Services.AddSignalR(); // Lï¿½gg till SignalR-tjï¿½nster
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -25,6 +25,6 @@ app.UseRouting(); // Se till att du har detta innan UseAuthorization
 app.UseAuthorization();
 
 app.MapControllers();
-app.MapHub<TemperatureHub>("/tempHub"); // Lägg till en SignalR hub endpoint
+
 
 app.Run();
