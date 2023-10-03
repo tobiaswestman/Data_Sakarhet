@@ -7,8 +7,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Server_API", "Server_API\Se
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IoTUnit_Console", "IoTUnit_Console\IoTUnit_Console.csproj", "{A76947D8-9820-4969-8381-C94854C8E1BA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApp", "WebApp\WebApp.csproj", "{EE190A2D-6EA1-4C49-ADC9-D5C6F45158CE}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,10 +21,6 @@ Global
 		{A76947D8-9820-4969-8381-C94854C8E1BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A76947D8-9820-4969-8381-C94854C8E1BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A76947D8-9820-4969-8381-C94854C8E1BA}.Release|Any CPU.Build.0 = Release|Any CPU
-		{EE190A2D-6EA1-4C49-ADC9-D5C6F45158CE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{EE190A2D-6EA1-4C49-ADC9-D5C6F45158CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{EE190A2D-6EA1-4C49-ADC9-D5C6F45158CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{EE190A2D-6EA1-4C49-ADC9-D5C6F45158CE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

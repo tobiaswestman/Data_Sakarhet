@@ -8,7 +8,7 @@ namespace WebApp.Models
 {
     public class TemperatureModel : PageModel
     {
-        public List<TemperatureData> InitialTemperatures { get; set; } = new List<TemperatureData>();
+        public static List<TemperatureData> InitialTemperatures { get; set; } = new List<TemperatureData>();
 
         public async Task OnGetAsync()
         {
