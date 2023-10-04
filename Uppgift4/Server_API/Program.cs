@@ -31,10 +31,12 @@ builder.Services.AddDbContext<DataContext>(x => x.UseSqlServer(builder.Configura
 builder.Services.AddScoped<JwtToken>();
 builder.Services.AddScoped<ITemperatureDataService, TemperatureDataService>();
 builder.Services.AddScoped<IAccountService, AccountService>();
+builder.Services.AddScoped<ITemperatureDataService, TemperatureDataService>();
 #endregion
 
 #region Repositories
 builder.Services.AddScoped<AccountRepo>();
+builder.Services.AddScoped<TemperatureDataRepo>();
 #endregion
 
 #region Identity
