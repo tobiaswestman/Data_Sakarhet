@@ -4,6 +4,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.SignalR;
 using Server_API.Helpers.Jwt;
 using Server_API.Helpers.Interfaces;
 using Server_API.Helpers.Services;
@@ -18,13 +19,16 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddSignalR(); // Lägg till SignalR-tj�nster
+builder.Services.AddCors();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 #region Databases
-builder.Services.AddDbContext<DataContext>(x => x.UseSqlServer(builder.Configuration["DataDB"]));
+builder.Services.AddDbContext<DataContext>(options =>
+        options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
 #endregion
 
 #region Helpers
@@ -99,11 +103,18 @@ if (app.Environment.IsDevelopment())
 	app.UseSwaggerUI();
 }
 
+app.UseCors(builder => builder
+    .WithOrigins("https://localhost:7258")
+    .AllowAnyMethod()
+    .AllowAnyHeader()
+    .AllowCredentials());
+
+
 app.UseHttpsRedirection();
 app.UseRouting(); // Se till att du har detta innan UseAuthorization
 app.UseAuthorization();
 
+app.MapHub<TemperatureDataHub>("/temperatureDataHub");
 app.MapControllers();
-
 
 app.Run();

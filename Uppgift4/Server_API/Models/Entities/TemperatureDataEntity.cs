@@ -9,6 +9,6 @@ namespace Server_API.Models.Entities
         public double Value { get; set; }
         public DateTime Timestamp { get; set; }
         public Guid UnitId { get; set; }
-        public UnitEntity Unit { get; set; }
+        //public UnitEntity Unit { get; set; }
     }
 }

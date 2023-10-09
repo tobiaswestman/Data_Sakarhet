@@ -24,7 +24,7 @@ public class TemperatureDataService : ITemperatureDataService
             UnitId = schema.UnitId
         };
 
-        await _temperatureDataRepo.AddAsync(temperatureData);
+        //await _temperatureDataRepo.AddAsync(temperatureData);
         return true;
 
     }

@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using Newtonsoft.Json;
 using Server_API.Helpers.Hubs;
 using Server_API.Helpers.Interfaces;
 using Server_API.Models.Schemas;
+using Server_API.Helpers.Encryption;
 
 namespace Server_API.Controllers
 {
@@ -21,10 +23,23 @@ namespace Server_API.Controllers
         }
 
         //placeholder metod, måste uppdateras
-        [Route("AddData")]
+        [Route("PostTemperature")]
         [HttpPost]
-        public async Task<IActionResult> PostTemperature([FromBody] TemperatureDataSchema schema)
+        public async Task<IActionResult> PostTemperature([FromBody] EncryptedPayload payload)
         {
+
+            // Steg 1: Dekryptera data
+            string decryptedJson = EncryptionModule.Decrypt(payload.Data);
+
+            // Steg 2: Konvertera till TemperatureDataSchema
+            TemperatureDataSchema schema = JsonConvert.DeserializeObject<TemperatureDataSchema>(decryptedJson);
+
+            // Kontrollera om schema är null eller inte giltigt (kan lägga till ytterligare valideringslogik här)
+            if (schema == null)
+            {
+                return BadRequest("Invalid data.");
+            }
+
             await _temperatureDataService.SaveTemperatureDataAsync(schema);
 
             // Broadcast to frontend

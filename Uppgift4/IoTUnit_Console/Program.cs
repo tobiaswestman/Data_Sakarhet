@@ -1,4 +1,6 @@
-﻿using Newtonsoft.Json;
+﻿using IoTUnit_Console.Encryption;
+using IoTUnit_Console.Models;
+using Newtonsoft.Json;
 using System.Text;
 
 class Program
@@ -7,12 +9,24 @@ class Program
 
     static async Task Main(string[] args)
     {
-        var apiUrl = "https://yourapiurl.com/api/temperature";
+        var apiUrl = "https://localhost:7087/api/temperatureData/PostTemperature";
 
         while (true)
         {
             var temperature = GetRandomTemperature();
-            var content = new StringContent(JsonConvert.SerializeObject(temperature), Encoding.UTF8, "application/json");
+
+            var schema = new TemperatureDataSchema
+            {
+                Value = temperature,
+                UnitId = Guid.NewGuid()
+            };
+
+            var encryptedPayload = new
+            {
+                Data = EncryptionModule.Encrypt(JsonConvert.SerializeObject(schema))
+            };
+
+            var content = new StringContent(JsonConvert.SerializeObject(encryptedPayload), Encoding.UTF8, "application/json");
 
             var response = await httpClient.PostAsync(apiUrl, content);
 
