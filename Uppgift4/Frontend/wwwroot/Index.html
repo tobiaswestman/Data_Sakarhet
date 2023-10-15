@@ -2,18 +2,64 @@
 <html>
 
 <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdnjs.cloudflare.com; connect-src 'self' wss://localhost:7087 https://localhost:7087 http://localhost:64864 ws://localhost:64864 wss://localhost:44319 http://localhost:52343 ws://localhost:52343;">
+
+    <link rel="stylesheet" href="app.css">
+
     <title>Temperature Monitor</title>
 </head>
 
 <body>
-    <h2>Average Temperature: <span id="averageTemperature">N/A</span> *C</h2>
+    <div id="container">
+        <div id="auth-buttons" class="auth-buttons-display">
+            <button id="login-btn">Logga in</button>
+            <button id="register-btn">Registrera</button>
+        </div>
 
-    <h1>Recent Temperatures:</h1>
-    
-    <ul id="temperatureList"></ul> 
+        <div id="login-form" class="hidden">
+            <label for="login-email">Email:</label>
+            <br>
+            <input type="email" id="login-email" placeholder="Email" required>
+            <br>
+            <br>
+            <label for="login-password">Lösenord:</label>
+            <br>
+            <input type="password" id="login-password" placeholder="Lösenord" minlength="6" required>
+            <br>
+            <br>
+            <button id="login-submit-btn">Logga in</button>
+            <button id="cancel-btn1">Avbryt</button>
+        </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/3.1.9/signalr.min.js"></script>
-    <script src="/app.js"></script>
+        <div id="register-form" class="hidden">
+            <label for="register-email">Email:</label>
+            <br>
+            <input type="email" id="register-email" placeholder="Email" required>
+            <br>
+            <br>
+            <label for="register-password">Lösenord:</label>
+            <br>
+            <input type="password" id="register-password" placeholder="Lösenord" minlength="6" required>
+            <br>
+            <br>
+            <button id="register-submit-btn">Registrera</button>
+            <button id="cancel-btn2">Avbryt</button>
+        </div>
+
+        <div id="data-view" class="hidden">
+            <button id="logout-btn">Logga ut</button>
+            <h2>Average Temperature: <span id="averageTemperature">N/A</span></h2>
+
+            <h1>Recent Temperatures:</h1>
+
+            <ul id="temperatureList"></ul>
+        </div>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/3.1.9/signalr.min.js"></script>
+        <script src="/app.js"></script>
+    </div>
 </body>
 
 </html>
+

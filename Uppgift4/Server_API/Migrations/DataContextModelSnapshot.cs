@@ -226,11 +226,12 @@ namespace Server_API.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("DeviceId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("Timestamp")
                         .HasColumnType("datetime2");
-
-                    b.Property<Guid>("UnitId")
-                        .HasColumnType("uniqueidentifier");
 
                     b.Property<double>("Value")
                         .HasColumnType("float");
@@ -242,11 +243,13 @@ namespace Server_API.Migrations
 
             modelBuilder.Entity("Server_API.Models.Entities.UnitEntity", b =>
                 {
-                    b.Property<Guid>("UnitId")
+                    b.Property<int>("UnitId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("int");
 
-                    b.Property<string>("UnitName")
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UnitId"));
+
+                    b.Property<string>("DeviceId")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 

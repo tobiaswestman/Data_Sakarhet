@@ -14,17 +14,17 @@ public class TemperatureDataService : ITemperatureDataService
         _temperatureDataRepo = temperatureDataRepo;
     }
 
-    //Denna bör hämta en iot-unit och sätta den också från id, detta är en första draft
+    //Save incoming temperature data to database
     public async Task<bool> SaveTemperatureDataAsync(TemperatureDataSchema schema)
     {
         var temperatureData = new TemperatureDataEntity
         {
             Value = schema.Value,
             Timestamp = DateTime.UtcNow,
-            UnitId = schema.UnitId
+            DeviceId = schema.DeviceId,
         };
 
-        //await _temperatureDataRepo.AddAsync(temperatureData);
+        await _temperatureDataRepo.AddAsync(temperatureData);
         return true;
 
     }

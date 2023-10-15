@@ -3,6 +3,6 @@
     public class TemperatureDataSchema
     {
         public double Value { get; set; }
-        public Guid UnitId { get; set; }
+        public string DeviceId { get; set; }
     }
 }

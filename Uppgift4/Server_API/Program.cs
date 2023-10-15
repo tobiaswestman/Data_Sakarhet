@@ -1,18 +1,14 @@
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.SignalR;
-using Server_API.Helpers.Jwt;
-using Server_API.Helpers.Interfaces;
-using Server_API.Helpers.Services;
-using Server_API.Helpers.Repositories;
-using Server_API.Helpers.Hubs;
-using System.Text;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Server_API.Contexts;
+using Server_API.Helpers.Hubs;
+using Server_API.Helpers.Interfaces;
+using Server_API.Helpers.Jwt;
+using Server_API.Helpers.Repositories;
+using Server_API.Helpers.Services;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,24 +22,39 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 #region Databases
+// Setup Entity Framework with SQL Server connection string.
 builder.Services.AddDbContext<DataContext>(options =>
         options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 #endregion
 
 #region Helpers
+// Register helper services for dependency injection.
 builder.Services.AddScoped<JwtToken>();
 builder.Services.AddScoped<ITemperatureDataService, TemperatureDataService>();
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<ITemperatureDataService, TemperatureDataService>();
+builder.Services.AddScoped<IUnitService, UnitService>();
 #endregion
 
 #region Repositories
+// Register repository services for dependency injection.
 builder.Services.AddScoped<AccountRepo>();
 builder.Services.AddScoped<TemperatureDataRepo>();
 #endregion
 
+#region Authorization Policies
+// Define custom authorization policies.
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("CanReadTemperature", policy => policy.RequireClaim("Permission", "Read"));
+    options.AddPolicy("CanWriteTemperature", policy => policy.RequireClaim("Permission", "Write"));
+});
+
+#endregion
+
 #region Identity
+// Configure identity settings for user management.
 builder.Services.AddIdentity<IdentityUser, IdentityRole>(x =>
 {
     x.Password.RequiredLength = 8;
@@ -61,6 +72,7 @@ builder.Services.Configure<DataProtectionTokenProviderOptions>(x =>
 #endregion
 
 #region Authentication
+// Configure JWT authentication.
 builder.Services.AddAuthentication(x =>
 {
     x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -71,9 +83,6 @@ builder.Services.AddAuthentication(x =>
     {
         OnTokenValidated = context =>
         {
-            if (string.IsNullOrEmpty(context?.Principal?.FindFirst("id")?.Value) || string.IsNullOrEmpty(context?.Principal?.Identity?.Name))
-                context?.Fail("Unauthorized");
-
             return Task.CompletedTask;
         }
     };
@@ -96,7 +105,18 @@ builder.Services.AddAuthentication(x =>
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Ensure default roles are present in the system.
+EnsureRolesCreated(app.Services).Wait();
+
+// Content Security Policy (CSP)
+app.Use(async (context, next) =>
+{
+    context.Response.Headers["Content-Security-Policy"] = "default-src 'self';";
+    await next();
+});
+
+
+// Set up middleware.
 if (app.Environment.IsDevelopment())
 {
 	app.UseSwagger();
@@ -104,17 +124,31 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors(builder => builder
-    .WithOrigins("https://localhost:7258")
+    .WithOrigins("https://localhost:7258", "https://localhost:7087")
     .AllowAnyMethod()
     .AllowAnyHeader()
     .AllowCredentials());
 
 
 app.UseHttpsRedirection();
-app.UseRouting(); // Se till att du har detta innan UseAuthorization
+app.UseRouting();
+app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapHub<TemperatureDataHub>("/temperatureDataHub");
+app.MapHub<TemperatureDataHub>("/temperatureDataHub"); // Map SignalR hub.
 app.MapControllers();
 
 app.Run();
+
+// Helper function to ensure necessary roles are created on startup.
+static async Task EnsureRolesCreated(IServiceProvider services)
+{
+    using var scope = services.CreateScope();
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+
+    if (!await roleManager.RoleExistsAsync("admin"))
+        await roleManager.CreateAsync(new IdentityRole("admin"));
+
+    if (!await roleManager.RoleExistsAsync("user"))
+        await roleManager.CreateAsync(new IdentityRole("user"));
+}

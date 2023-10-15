@@ -8,7 +8,6 @@ namespace Server_API.Models.Entities
         public Guid Id { get; set; }
         public double Value { get; set; }
         public DateTime Timestamp { get; set; }
-        public Guid UnitId { get; set; }
-        //public UnitEntity Unit { get; set; }
+        public string DeviceId { get; set; }
     }
 }

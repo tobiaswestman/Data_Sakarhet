@@ -6,6 +6,7 @@ namespace Server_API.Helpers.Repositories
 {
     public class AccountRepo : Repo<UserEntity>
     {
+        //Account repo, inherits from base repo
         public AccountRepo(DataContext context) : base(context)
         {
         }

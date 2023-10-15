@@ -9,9 +9,11 @@ namespace IoTUnit_Console.Encryption
 {
     internal class EncryptionModule
     {
+        // Private key and Initialization vector for AES encryption/decryption.
         private static readonly byte[] Key = Encoding.UTF8.GetBytes("ThisIsASecretKey"); // 16 byte
         private static readonly byte[] Iv = Encoding.UTF8.GetBytes("ThisIsSecretIV12"); // 16 byte
 
+        // Encrypts the given plain text using AES encryption.
         public static string Encrypt(string plainText)
         {
             using (var aes = new AesManaged())
@@ -29,6 +31,7 @@ namespace IoTUnit_Console.Encryption
             }
         }
 
+        // Decrypts the given cipher text using AES decryption.
         public static string Decrypt(string cipherText)
         {
             using (var aes = new AesManaged())

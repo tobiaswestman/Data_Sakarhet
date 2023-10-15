@@ -14,13 +14,14 @@ public class JwtToken
         _configuration = configuration;
     }
 
+    // Generates a JWT token with the specified claims and expiration time.
     public string GenerateToken(ClaimsIdentity claimsIdentity, DateTime expiresAt)
     {
         var tokenHandler = new JwtSecurityTokenHandler();
         var securityTokenDescriptor = new SecurityTokenDescriptor
         {
-            Issuer = _configuration["TokenValidation:ValidIssuer"],
-            Audience = _configuration["TokenValidation:ValidAudience"],
+            Issuer = _configuration["TokenValidation:Issuer"],
+            Audience = _configuration["TokenValidation:Audience"],
             Subject = claimsIdentity,
             Expires = expiresAt,
             SigningCredentials = new SigningCredentials(
@@ -29,5 +30,20 @@ public class JwtToken
                 SecurityAlgorithms.HmacSha512Signature)
         };
         return tokenHandler.WriteToken(tokenHandler.CreateToken(securityTokenDescriptor));
+    }
+
+    // Generates a device-specific JWT token.
+    public string GenerateDeviceToken(string unitId, string deviceId)
+    {
+        var claims = new[]
+            {
+                new Claim("UnitId", unitId),
+                new Claim("DeviceId", deviceId),
+                new Claim("Permission", "Write")
+            };
+
+        var claimsIdentity = new ClaimsIdentity(claims);
+
+        return GenerateToken(claimsIdentity, DateTime.Now.AddMinutes(30));
     }
 }

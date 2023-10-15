@@ -6,6 +6,7 @@ namespace Server_API.Helpers.Repositories;
 
 public class TemperatureDataRepo : Repo<TemperatureDataEntity>
 {
+    //Temperature data repo, inherits from base repo
     public TemperatureDataRepo(DataContext context) : base(context)
     {
     }
