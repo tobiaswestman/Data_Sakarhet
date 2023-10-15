@@ -1,0 +1,27 @@
+.hidden {
+    display: none;
+}
+
+.auth-buttons-display {
+    display: block;
+}
+
+body.admin-role {
+    background-color: rgb(216, 136, 136);
+}
+
+body.user-role {
+    background-color: rgb(140, 183, 224);
+}
+
+#container{
+    border: 2px solid;
+    display: flex;
+    justify-content: center;
+    padding-top: 50px;
+    padding-bottom: 50px;
+    margin-left: 300px;
+    margin-right: 300px;
+    margin-top: 100px;
+    margin-bottom: 100px;
+}

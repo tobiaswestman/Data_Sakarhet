@@ -1,62 +1,135 @@
-﻿using System.Security.Cryptography;
-using System.Text;
-using Microsoft.AspNetCore.SignalR.Client;
+﻿//using IoTUnit_Console.Encryption;
+//using IoTUnit_Console.Models;
+//using Newtonsoft.Json;
+//using System.Text;
 
-namespace IoTUnit_Console;
+//class Program
+//{
+//    private static readonly HttpClient httpClient = new HttpClient();
+
+//    static async Task Main(string[] args)
+//    {
+//        var apiUrl = "https://localhost:7087/api/temperatureData/PostTemperature";
+
+//        while (true)
+//        {
+//            var temperature = GetRandomTemperature();
+
+//            var schema = new TemperatureDataSchema
+//            {
+//                Value = temperature,
+//                UnitId = Guid.NewGuid() // TODO: Ideally, this should be the ID you get back from the server on registration, not a new Guid each time.
+//            };
+
+//            var encryptedPayload = new
+//            {
+//                Data = EncryptionModule.Encrypt(JsonConvert.SerializeObject(schema))
+//            };
+
+//            var content = new StringContent(JsonConvert.SerializeObject(encryptedPayload), Encoding.UTF8, "application/json");
+
+//            var response = await httpClient.PostAsync(apiUrl, content);
+
+//            if (response.IsSuccessStatusCode)
+//            {
+//                Console.WriteLine($"Sent temperature: {temperature}");
+//            }
+//            else
+//            {
+//                Console.WriteLine($"Error sending temperature: {response.StatusCode}");
+//            }
+
+//            await Task.Delay(TimeSpan.FromSeconds(5)); // Send every 5 seconds for this example
+//        }
+//    }
+
+//    static double GetRandomTemperature()
+//    {
+//        Random random = new Random();
+//        return 20 + random.NextDouble() * 10;  // Random temperature between 20 and 30
+//    }
+//}
+
+using IoTUnit_Console.Encryption;
+using IoTUnit_Console.Models;
+using Newtonsoft.Json;
+using System.Net.Http;
+using System.Text;
+
 
 class Program
 {
-	private static readonly RandomNumberGenerator _rng = RandomNumberGenerator.Create();
-	private static byte[] _key;  // Enhetens krypteringsnyckel
+    private static readonly HttpClient httpClient = new HttpClient();
+    private static string _jwtToken;
 
-	public Program(byte[] encryptionKey)
-	{
-		_key = encryptionKey;
-	}
-	
-	public static double GenerateRandomTemperature()
-	{
-		byte[] randomNumber = new byte[1];
-		_rng.GetBytes(randomNumber);
+    static async Task Main(string[] args)
+    {
+        await Task.Delay(TimeSpan.FromSeconds(3));  // Give server time to start
+        await RegisterUnit();
 
-		double percentage = randomNumber[0] / 255.0;
-		return -20 + (60 * percentage);  // 60 är intervallet mellan -20 och 40
-	}
+        var apiUrl = "https://localhost:7087/api/temperatureData/PostTemperature";
 
-	// Kryptera temperaturen med en symmetrisk krypteringsalgoritm
-	public static string EncryptTemperature(double temperature)
-	{
-		using (Aes aes = Aes.Create())
-		{
-			aes.Key = _key;
-			aes.IV = new byte[16];  // Initialisera IV till noll för detta exempel, men i praktiken bör du generera en ny IV för varje kryptering.
+        while (true)
+        {
+            // Generate and prepare the temperature payload for sending.
+            var temperature = GetRandomTemperature();
 
-			byte[] temperatureBytes = Encoding.UTF8.GetBytes(temperature.ToString("F2"));  // Konverterar temperaturen till en sträng med två decimaler och sedan till byte-array
+            var schema = new TemperaturePayloadSchema
+            {
+                Value = temperature
+            };
 
-			using (var encryptor = aes.CreateEncryptor())
-			{
-				byte[] encryptedTemperature = encryptor.TransformFinalBlock(temperatureBytes, 0, temperatureBytes.Length);
-				return Convert.ToBase64String(encryptedTemperature);  // Returnera som Base64-sträng för enkel transport
-			}
-		}
-	}
-	
-	static async Task Main(string[] args)
-	{
-		var hubConnection = new HubConnectionBuilder()
-			.WithUrl("https://your-web-api-url/tempHub", options => {
-				options.Headers.Add("Authorization", "Bearer YOUR_TOKEN_HERE"); // Om du har autentisering
-			})
-			.Build();
+            var jsonPayload = JsonConvert.SerializeObject(schema);
+            var encryptedPayload = EncryptionModule.Encrypt(jsonPayload);
+            
+            var content = new StringContent($"\"{encryptedPayload}\"", Encoding.UTF8, "application/json");
 
-		await hubConnection.StartAsync();
+            // Add JWT to the request header for authentication.
+            if (!string.IsNullOrEmpty(_jwtToken))
+            {
+                httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _jwtToken);
+            }
 
-		while (true)
-		{
-			double temperature = GenerateRandomTemperature(); // Implementera denna funktion
-			string encryptedTemp = EncryptTemperature(temperature); // Implementera denna funktion
-			await hubConnection.SendAsync("SendTemperature", "YourDeviceId", encryptedTemp);
-			await Task.Delay(5000);
-		}
-	}
+            // Send the temperature data to the server.
+            var response = await httpClient.PostAsync(apiUrl, content);
+
+            if (response.IsSuccessStatusCode)
+            {
+                Console.WriteLine($"Sent temperature: {temperature}");
+            }
+            else
+            {
+                Console.WriteLine($"Error sending temperature: {response.StatusCode}");
+            }
+
+            await Task.Delay(TimeSpan.FromSeconds(5));  // Send every 5 seconds
+        }
+    }
+
+    // Registers the unit with the server. 
+    static async Task RegisterUnit()
+    {
+        var registrationUrl = "https://localhost:7087/api/unit/register";
+
+        // sends empty request and recieves jwt token in response
+        var content = new StringContent("", Encoding.UTF8, "application/json");
+        var response = await httpClient.PostAsync(registrationUrl, content);
+
+        if (response.IsSuccessStatusCode)
+        {
+            _jwtToken = await response.Content.ReadAsStringAsync();
+        }
+        else
+        {
+            Console.WriteLine($"Error registering unit: {response.StatusCode}");
+        }
+    }
+
+    // Generates a random temperature between 20 and 30.
+    static double GetRandomTemperature()
+    {
+        Random random = new Random();
+        return 20 + random.NextDouble() * 10;  // Random temperature between 20 and 30
+    }
 }
+
